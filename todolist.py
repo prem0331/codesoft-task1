@@ -1,50 +1,61 @@
 import tkinter as tk
+from tkinter import messagebox
 
-def add_to_display(value):
-    current = display_var.get()
-    if current == "Error":
-        display_var.set("")
-    display_var.set(current + value)
-
-def clear_display():
-    display_var.set("")
-
-def calculate():
-    try:
-        result = eval(display_var.get())
-        display_var.set(str(result))
-    except Exception as e:
-        display_var.set("Error")
-
-root = tk.Tk()
-root.title("Simple Calculator")
-root.configure(bg="pink")
-
-display_var = tk.StringVar(root, "")
-
-display = tk.Entry(root, textvariable=display_var, font=("Helvetica", 24), justify="right", bg="white")
-display.grid(row=0, column=0, columnspan=4, padx=10, pady=10, sticky="nsew")
-
-button_texts = [
-    '7', '8', '9', '/',
-    '4', '5', '6', '*',
-    '1', '2', '3', '-',
-    'C', '0', '=', '+'
-]
-
-row = 1
-col = 0
-
-for text in button_texts:
-    if text == 'C':
-        tk.Button(root, text=text, font=("Helvetica", 16), bg="gray", command=clear_display).grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
-    elif text == '=':
-        tk.Button(root, text=text, font=("Helvetica", 16), bg="gray", command=calculate).grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
+def add_task():
+    task = entry_task.get()
+    if task != "":
+        listbox_tasks.insert(tk.END, task)
+        entry_task.delete(0, tk.END)
     else:
-        tk.Button(root, text=text, font=("Helvetica", 16), bg="gray", command=lambda t=text: add_to_display(t)).grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
-    col += 1
-    if col > 3:
-        col = 0
-        row += 1
+        messagebox.showwarning("Warning", "Please enter a task.")
+
+def delete_task():
+    try:
+        task_index = listbox_tasks.curselection()[0]
+        listbox_tasks.delete(task_index)
+    except IndexError:
+        messagebox.showwarning("Warning", "Please select a task to delete.")
+
+def mark_done():
+    try:
+        task_index = listbox_tasks.curselection()[0]
+        listbox_tasks.itemconfig(task_index, {'bg':'blue'})
+    except IndexError:
+        messagebox.showwarning("Warning", "Please select a task to mark as done.")
+
+def clear_list():
+    listbox_tasks.delete(0, tk.END)
+
+# Create the main window
+root = tk.Tk()
+root.title("To-Do List")
+
+# Create GUI components
+frame_tasks = tk.Frame(root)
+frame_tasks.pack()
+
+listbox_tasks = tk.Listbox(frame_tasks, height=10, width=50, bg="yellow")
+listbox_tasks.pack(side=tk.LEFT)
+
+scrollbar_tasks = tk.Scrollbar(frame_tasks)
+scrollbar_tasks.pack(side=tk.RIGHT, fill=tk.Y)
+
+listbox_tasks.config(yscrollcommand=scrollbar_tasks.set)
+scrollbar_tasks.config(command=listbox_tasks.yview)
+
+entry_task = tk.Entry(root, width=50)
+entry_task.pack()
+
+button_add_task = tk.Button(root, text="Add Task", width=48, command=add_task)
+button_add_task.pack()
+
+button_delete_task = tk.Button(root, text="Delete Task", width=48, command=delete_task)
+button_delete_task.pack()
+
+button_mark_done = tk.Button(root, text="Mark Done", width=48, command=mark_done)
+button_mark_done.pack()
+
+button_clear_list = tk.Button(root, text="Clear List", width=48, command=clear_list)
+button_clear_list.pack()
 
 root.mainloop()
